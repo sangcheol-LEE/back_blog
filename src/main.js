@@ -6,7 +6,7 @@ import  mongoose from "mongoose";
 
 
 import api from "./api"
-import createFakeData from './createFakeData';
+import jwtMiddleware from './lib/jwtMiddleware';
 
 const { PORT, MONGO_URI } = process.env;
 
@@ -27,6 +27,7 @@ const router = new Router();
 router.use("/api", api.routes());
 
 app.use(bodyParser());
+app.use(jwtMiddleware);
 
 app.use(router.routes()).use(router.allowedMethods());
 
