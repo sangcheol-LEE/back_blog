@@ -12,6 +12,6 @@ posts.get("/" ,postsCtrl.read);
 posts.delete("/", checkLoggedIn ,postsCtrl.remove);
 posts.patch("/", checkLoggedIn ,postsCtrl.update);
 
-posts.use('/:id', postsCtrl.checkObjectId, post.routes())
+posts.use('/:id', postsCtrl.getPostById, post.routes())
 
 export default posts;
