@@ -25,6 +25,15 @@ export const getPostById = async(ctx, next) => {
   }
 };
 
+export const checkOwnPost = (ctx, next) => {
+  const {user, post} = ctx.state;
+  if(post.user._id.toString() !== user._id) {
+    ctx.status = 403;
+    return;
+  }
+  return next()
+}
+
 /* 
   포스트 작성 
   POST /api/posts
@@ -68,7 +77,7 @@ export const write = async ctx => {
 
 /* 
   포스트 목록 조회 
-  GET /api/posts
+  GET /api/posts?username=&tag=&page=
 */
 export const list = async ctx => {
   const page = parseInt(ctx.query.page || "1", 10);
@@ -76,13 +85,19 @@ export const list = async ctx => {
     ctx.status = 400;
     return
   }
+  const {tag, username} = ctx.query;
+  // tag, username 값이 유효하면 객체 안에 넣고 , 그렇지 않으면 넣지 않음
+  const query = {
+    ...(username ? {"user.username" :username }: {}),
+    ...(tag ? {tags : tag} : {})
+  }
     try{
-      const posts = await Post.find()
+      const posts = await Post.find(query)
       .sort({_id : -1})
       .limit(10)
       .skip((page - 1) * 10)
       .exec();
-      const postCount = await Post.countDocuments().exec();
+      const postCount = await Post.countDocuments(query).exec();
       ctx.set("Last-page", Math.ceil(postCount / 10 ));
       ctx.body = posts
         .map(post => post.toJSON())
